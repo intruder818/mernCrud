@@ -12,6 +12,13 @@
   margin: 0px 10px;
   border: none;
 }
+.my-btn.del{
+  background-color: #FF6263;
+}
+
+.my-btn.edit{
+  background-color: #1B98F5;
+}
 .my-btn:hover{
   cursor: pointer;
 }

@@ -18,7 +18,18 @@ const goalSchema=mongoose.Schema({
     }
     ,
 
-    date:Date
+    expense:{
+        type:Number,
+        required:(true,'Please add  a text')
+    },
+
+    city:{
+        type:String,
+        required:(true,'Please add  a text')
+
+    }
+
+    
 
 
 },{

@@ -4,11 +4,13 @@ import { useEffect,useState } from 'react'
 import {useSelector,useDispatch} from 'react-redux'
 import  {useNavigate} from 'react-router-dom'
 import {getAllGoals,delGoal,editGoal} from '../../features/goal/goalSlice'
-import { Table ,Modal,Input,Form, Pagination} from "antd";
+import { Table ,Modal,Input,Form, Col,Row,Pagination} from "antd";
 import 'antd/dist/antd.css';
 
 
 function GoalTable() {
+  
+  const [loading,setLoading]=useState(false)
     const [id,setId]=useState(null)
     const [visible, setVisible] = useState(false); 
 const Edit = () => { 
@@ -16,12 +18,44 @@ const Edit = () => {
 }; 
 const [updateData,setupdateData]=useState({
     text:"",
+    expense:"",
+    city:""
 })
 
-const {text}=updateData
+const {text,city,expense}=updateData
 const [edit, setEdit] = useState(null);
 
+const navigate=useNavigate()
+const dispatch=useDispatch()
+const {user,isEdit,}=useSelector((state)=>(state.auth))
+const {allGoals,isLoading,isSuccess,cityExpense,totalExpense}=useSelector((state)=>(state.goal))
+const catExpense=cityExpense
 
+const pklsum=catExpense.map((e)=>{if (e._id=="Panchkula"){
+  return e.Total
+}})
+
+
+const zksum=catExpense.map((e)=>{if (e._id=="Zirakpur"){
+  return e.Total
+}})
+
+console.log("catExpense",(catExpense));
+
+useEffect(()=>{
+  if(!user){
+    navigate("/login")
+  }
+},[user,navigate]) 
+
+useEffect(()=>{
+  console.log("getallgoals useffect");
+  dispatch(getAllGoals())
+},[])
+useEffect(()=>{
+  console.log("getallgoals useffect");
+  dispatch(getAllGoals())
+},[dispatch,isSuccess])
 
 
 
@@ -37,18 +71,34 @@ const [edit, setEdit] = useState(null);
         title: "Time", 
         dataIndex: "createdAt", 
         },
+        { 
+          key: "expense", 
+          title: "Expense", 
+          dataIndex: "expense", 
+          },
+          { 
+            key: "city", 
+            title: "city", 
+            dataIndex: "city", 
+            },
         {
             key:"Actions",
             title:"Actions",
             render:(goal)=>{
                 return(  <>
-                    <button className='my-btn' onClick={()=>{Edit()
+                    <button className='my-btn edit' onClick={()=>{Edit()
                                                             setId(goal._id)
+                                                            setupdateData({
+                                                              text:goal.text,
+                                                              city:goal.city,
+                                                              expense:goal.expense
+                                                            })
+                                                            
 
                     }}>Edit</button>
 
  <>
-                       
+              
 <Modal 
 title="Edit Details" 
 visible={visible} 
@@ -59,11 +109,17 @@ onOk={() =>
     console.log("Goal ID onOK",goal_id);
     const goalData={
         text,
+        expense,
+        city,
         goal_id
         
     }
     dispatch(editGoal(goalData))
     setVisible(false)
+    setupdateData({ text:"",
+    expense:"",
+    city:""})
+    
 
 }} 
 okText="submit" 
@@ -72,11 +128,39 @@ okText="submit"
 >
 
 
+
+
     <Form >
 
-            <Input 
+    <Input 
             value={text}
             name="text" 
+            placeholder='Edit Task'
+            onChange={(e) => { 
+            setupdateData((pre) => { 
+            return { ...pre, [e.target.name]: e.target.value }; 
+            }); 
+        }} 
+        /> 
+  
+
+           
+
+  <Input 
+            value={city}
+            name="city" 
+            placeholder='Edit City'
+            onChange={(e) => { 
+            setupdateData((pre) => { 
+            return { ...pre, [e.target.name]: e.target.value }; 
+            }); 
+        }} 
+        /> 
+
+      <Input 
+            value={expense}
+            name="expense" 
+            placeholder='Add Expense'
             onChange={(e) => { 
             setupdateData((pre) => { 
             return { ...pre, [e.target.name]: e.target.value }; 
@@ -92,7 +176,7 @@ okText="submit"
 
 
 
-                    <button className='my-btn'onClick={()=>(
+                    <button className='my-btn del'onClick={()=>(
                     Modal.confirm({
           title: 'Please Confirm to delete ',
          
@@ -110,20 +194,7 @@ okText="submit"
             }
         }
     ]
-    const navigate=useNavigate()
-    const dispatch=useDispatch()
-    const {user,isEdit}=useSelector((state)=>(state.auth))
-    const {allGoals}=useSelector((state)=>(state.goal))
-    useEffect(()=>{
-      if(!user){
-        navigate("/login")
-      }
-    },[user,navigate]) 
-  
-    useEffect(()=>{
-      console.log("getallgoals useffect");
-      dispatch(getAllGoals())
-    },[])
+   
   return (<>
 
     
@@ -134,11 +205,31 @@ okText="submit"
     <div className="app"> 
 <div className="table"> 
 
-<Table dataSource={allGoals} columns={columns} pagination={false} /> 
+<Table 
+dataSource={allGoals}  
+loading={isLoading} 
+columns={columns} 
+pagination={{ pageSize:8,onChange:(page)=>(dispatch(getAllGoals(page)))}} 
+
+footer={() =>{return (<>
+
+ <Row>
+  <Col>Panchkula:</Col>
+  <Col>{pklsum}</Col>
+
+  <Col>Zirakpur</Col>
+  <Col>{zksum}</Col>
+
+ </Row>
+</>)}}
+
+/> 
 
 </div> 
 </div> 
-<Pagination defaultCurrent={1} total={allGoals.length} /></>:
+
+
+</>:
 <><h3>Please add your Tasks First</h3></>}
 
     {/* {allGoals.map((e)=>(

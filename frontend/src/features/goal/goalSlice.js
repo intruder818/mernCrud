@@ -23,6 +23,8 @@ if (goal){
 const initialState={
    goal:goal?goal:null,
     allGoals:[],
+    cityExpense:[],
+    totalExpense:[],
     isError:false,
     isSuccess:false,
     isLoading:false,
@@ -67,18 +69,24 @@ export const addGoal=createAsyncThunk('goal/addGoal',async(goal,thunkAPI)=>{
        }
 })
 
-export const getAllGoals=createAsyncThunk('goal/getAllGoals',async(goal,thunkAPI)=>{
+export const getAllGoals=createAsyncThunk('goal/getAllGoals',async(page,thunkAPI)=>{
 
     try {
-
+        let Page=0
+        if (page){
+            Page=page-1
+        }
         const token=thunkAPI.getState().auth.user.token
         const config = {
+            
             headers: {
               Authorization: `Bearer ${token}`,
             }}
-         
+         console.log("page",Page);
          console.log("Get allGoal api hit");
-        const res=await axios.get(Base_url+goalApi,config)
+        const res=await axios.get(Base_url+goalApi+`?page=${Page}`,config)
+
+        console.log("url",Base_url+goalApi+`?page=${Page}`);
         
         console.log('getAllGoals response data',res.data);
 
@@ -194,30 +202,50 @@ export const goalSlice=createSlice({
     extraReducers:(  builder)=>{
         builder.addCase(addGoal.fulfilled,(state,action)=>{
             state.goal=action.payload
-            state.allGoals.push(action.payload)
+            state.allGoals=(action.payload)
             state.isSuccess=true
         })
         .addCase(addGoal.rejected,(state,action)=>{
             state.message=action.payload
             state.isError=true
+            state.isSuccess=false
            
         })
         .addCase(getAllGoals.fulfilled,(state,action)=>{
-            state.allGoals=action.payload
+            state.allGoals=action.payload.goals
+            state.TotalSum=action.payload.Total
+            state.cityExpense=action.payload.cityExpense
+            state.totalExpense=action.payload.totalExpense
+
         }).addCase(getAllGoals.rejected,(state,action)=>{
             state.isError=true
             state.message=action.payload
-        }).addCase(delGoal.fulfilled,(state,action)=>{
+            state.isSuccess=false
+
+        }).addCase(delGoal.pending,(state)=>{
+            state.isLoading=true
+        })
+        .addCase(delGoal.fulfilled,(state,action)=>{
             state.allGoals=action.payload
+            state.isLoading=false
+            state.isSuccess=true
         }).addCase(delGoal.rejected,(state,action)=>{
             state.isError=true
             state.message=action.payload
-        }).addCase(editGoal.fulfilled,(state,action)=>{
+            state.isLoading=false
+            state.isSuccess=false
+        }).addCase(editGoal.pending,(state)=>{ state.isLoading=true}
+           
+        )
+        .addCase(editGoal.fulfilled,(state,action)=>{
             state.allGoals=(action.payload)
             state.isSuccess=true
+            state.isLoading=false
         }).addCase(editGoal.rejected,(state,action)=>{
             state.isError=true
             state.message=action.payload
+            state.isLoading=false
+            state.isSuccess=false
         })
     }
 

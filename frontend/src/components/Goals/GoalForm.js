@@ -19,6 +19,8 @@ function GoalForm() {
     const [formData,setFormData]=useState({
        
         text:"",
+        expense:"",
+        city:"",
         user:user
        
     })
@@ -53,18 +55,22 @@ useEffect(()=>{
         )
         )
     } 
-const {text}=formData
+const {text,expense,city}=formData
 const onSubmit =(e)=>{
             console.log("submit function");
         e.preventDefault()
 
         const goalData={
             text,
+            expense,
+            city
             
         }
 
         console.log('goalData',goalData);
         dispatch(addGoal(goalData))
+        setFormData({text:"",expense:"",
+        city:"",})
       
 
     }
@@ -74,7 +80,8 @@ const onSubmit =(e)=>{
 
 <div className='form-group'>
 
-{/* Email*/}
+
+{/* Text*/}
    <input 
            type="text" className="form-control" id="text" 
            value={text} name="text" 
@@ -82,6 +89,29 @@ const onSubmit =(e)=>{
            onChange={onChange}
    />
 </div>
+
+<div className='form-group'>
+
+{/* City*/}
+   <input 
+           type="text" className="form-control" id="city" 
+           value={city} name="city" 
+           placeholder='City' 
+           onChange={onChange}
+   />
+</div>
+
+<div className='form-group'>
+
+{/* Expense*/}
+   <input 
+           type="text" className="form-control" id="expense" 
+           value={expense} name="expense" 
+           placeholder='Expense' 
+           onChange={onChange}
+   />
+</div>
+
 
                 <div className='form-group'>
                     <input type="submit" className='btn btn-block' onClick={onSubmit}/>

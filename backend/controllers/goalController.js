@@ -13,41 +13,62 @@ const User=require("../models/userModel")
 
 // get goals
 const getGoals= asyncHandler(async (req,res)=>{
-    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 0;
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 8;
     const page = req.query.page ? parseInt(req.query.page) : 0;
     const goals=await Goal.find({user:req.user.id}).limit(pageSize).skip(pageSize * page).sort({ _id: 1 });
-    res.status(200).json(goals)
+    const totalExpense= await Goal.aggregate([{$group: {_id:null, Total:{$sum:"$expense"}}}])
+    const cityExpense= await Goal.aggregate([{$group: {_id:"$city", Total:{$sum:"$expense"}}}])
+    console.log("TotalEXp",totalExpense);
+    console.log("Zsum",cityExpense);
+    res.status(200).json({
+        goals,cityExpense,totalExpense
+    })
 })
+
+
 
 
 
 // seT goals
 const setGoals= asyncHandler(async(req,res)=>{ 
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 8;
+    const page = req.query.page ? parseInt(req.query.page) : 0;
     console.log("set goal api triggered");
-    console.log("goal Data---> BE",req.body);
+    // console.log("goal Data---> BE",req.body);
     // to check for empty obj {}
         const obj =req.body;
         const isEmpty = Object.keys(obj).length === 0;
-    
-    if (!req.body.text) {
+    const {text,city,expense}=req.body
+    if (!(text||city||expense)) {
         console.log("teted empty");
         res.status(404)
-        throw new Error('Please add a text field')
+        throw new Error('Please add all fields')
         return
       }
 
       const goal=await Goal.create({
-        text:req.body.text,
+        text:text,
+        city,
+        expense,
         user:req.user.id
       })
 
-
-        res.status(200).json(goal)
+      const goals=await Goal.find({user:req.user.id});
+     
+    res.status(200).json(goals)
+        
+        
+        
+        
+        
+       
       
 })
 
 // update goals
 const updateGoals=asyncHandler( async (req,res)=>{
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 8;
+    const page = req.query.page ? parseInt(req.query.page) : 0;
 
     const goal= await Goal.findById(req.params.id)
 
@@ -76,6 +97,8 @@ const updateGoals=asyncHandler( async (req,res)=>{
     
     const updatedGoal= await Goal.findByIdAndUpdate(req.params.id,req.body,{new:true})
     const goals=await Goal.find({user:req.user.id})
+    // res.status(200).json(goals)
+    // const goals=await Goal.find({user:req.user.id}).limit(pageSize).skip(pageSize * page).sort({ _id: 1 });
     res.status(200).json(goals)
     
     })
@@ -83,6 +106,8 @@ const updateGoals=asyncHandler( async (req,res)=>{
 
 // Delete goals
 const deleteGoals=asyncHandler(async (req,res)=>{ 
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 8;
+    const page = req.query.page ? parseInt(req.query.page) : 0;
     console.log("---------BE Del Api -----");
     const goal= await Goal.findById(req.params.id)
 
@@ -112,8 +137,11 @@ const deleteGoals=asyncHandler(async (req,res)=>{
 
     const deleteGoal= await Goal.findByIdAndDelete(req.params.id)
 
-    const goals=await Goal.find({user:req.user.id})
+    // const goals=await Goal.find({user:req.user.id})
+    // res.status(200).json(goals)
+    const goals=await Goal.find({user:req.user.id}).limit(pageSize).skip(pageSize * page).sort({ _id: 1 });
     res.status(200).json(goals)
+    
 }
     )
 

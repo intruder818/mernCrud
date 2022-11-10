@@ -8,6 +8,7 @@ import {useSelector,useDispatch} from 'react-redux'
 import  {useNavigate} from 'react-router-dom'
 import {getAllGoals,delGoal} from '../features/goal/goalSlice'
 import GoalTable from '../components/Goals/GoalTable'
+import TableSum from '../components/Goals/TableSum'
 
 
 
@@ -42,6 +43,7 @@ function Dashboard() {
     <div>Dashboard</div>
    <GoalForm/>
    <GoalTable/>
+   <TableSum/>
    
 
     {/* <h2>Hey there</h2>
