@@ -4,8 +4,7 @@ function TableSum() {
   return (
     <div>
 
-        <h3>Total Sum</h3>
-
+       
     </div>
   )
 }

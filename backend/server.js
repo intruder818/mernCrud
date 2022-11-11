@@ -12,6 +12,7 @@ const  Goal=require('./models/goalModel')
 const cors = require('cors')
 
 
+
 // importign db
 
 const connectDB=require("./config/db")
@@ -23,6 +24,8 @@ const { log } = require("console")
 // initialising express app
 const app =express()
 app.use(cors())
+
+
 
 
 

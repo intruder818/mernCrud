@@ -3,6 +3,8 @@ const { log } = require("console")
 const asyncHandler=require("express-async-handler")
 const Goal=require("../models/goalModel")
 
+const mongoose=require("mongoose")
+
 const User=require("../models/userModel")
 
 
@@ -15,13 +17,20 @@ const User=require("../models/userModel")
 const getGoals= asyncHandler(async (req,res)=>{
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 8;
     const page = req.query.page ? parseInt(req.query.page) : 0;
+    const user_id=req.user.id
     const goals=await Goal.find({user:req.user.id}).limit(pageSize).skip(pageSize * page).sort({ _id: 1 });
-    const totalExpense= await Goal.aggregate([{$group: {_id:null, Total:{$sum:"$expense"}}}])
+    const totalExpense= await Goal.aggregate([
+        { $match: {"user":new mongoose.Types.ObjectId(user_id)} },
+        {$group: {_id:{city:"$city"}, cityExpense:{$sum:"$expense"}}},
+
+       { $project:{city:"$_id.city",cityExpense:"$cityExpense",Total:{$sum:"$cityExpense"}}}
+    ])
     const cityExpense= await Goal.aggregate([{$group: {_id:"$city", Total:{$sum:"$expense"}}}])
+    // const totalExpense= await Goal.aggregate([{ $match: {"user":new mongoose.Types.ObjectId(user_id)} },{$group: {_id:null, citynew:{$sum:"$expense"}}}])
     console.log("TotalEXp",totalExpense);
     console.log("Zsum",cityExpense);
     res.status(200).json({
-        goals,cityExpense,totalExpense
+        goals,totalExpense
     })
 })
 

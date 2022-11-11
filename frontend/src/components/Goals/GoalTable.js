@@ -28,19 +28,33 @@ const [edit, setEdit] = useState(null);
 const navigate=useNavigate()
 const dispatch=useDispatch()
 const {user,isEdit,}=useSelector((state)=>(state.auth))
-const {allGoals,isLoading,isSuccess,cityExpense,totalExpense}=useSelector((state)=>(state.goal))
-const catExpense=cityExpense
-
-const pklsum=catExpense.map((e)=>{if (e._id=="Panchkula"){
-  return e.Total
-}})
+const {allGoals,isLoading,isSuccess,totalExpense}=useSelector((state)=>(state.goal))
 
 
-const zksum=catExpense.map((e)=>{if (e._id=="Zirakpur"){
-  return e.Total
-}})
 
-console.log("catExpense",(catExpense));
+const Totalsum=totalExpense.reduce((acc,curr)=>{
+
+  acc+=curr.cityExpense
+
+  return acc
+
+},0)
+
+console.log("TOTal sum",Totalsum);
+// const catExpense=cityExpense
+
+
+
+// const pklsum=catExpense.map((e)=>{if (e._id=="Panchkula"){
+//   return e.Total
+// }})
+
+
+// const zksum=catExpense.map((e)=>{if (e._id=="Zirakpur"){
+//   return e.Total
+// }})
+
+// console.log("catExpense",(catExpense));
 
 useEffect(()=>{
   if(!user){
@@ -131,7 +145,7 @@ okText="submit"
 
 
     <Form >
-
+    <label>Task</label>
     <Input 
             value={text}
             name="text" 
@@ -144,8 +158,7 @@ okText="submit"
         /> 
   
 
-           
-
+  
   <Input 
             value={city}
             name="city" 
@@ -156,6 +169,8 @@ okText="submit"
             }); 
         }} 
         /> 
+
+
 
       <Input 
             value={expense}
@@ -194,11 +209,14 @@ okText="submit"
             }
         }
     ]
-   
+   totalExpense.map((e)=>{
+    console.log(e.city);
+   })
   return (<>
 
     
 <h2>My Goals</h2>
+
 
 
 {allGoals.length>0?<>
@@ -214,11 +232,14 @@ pagination={{ pageSize:8,onChange:(page)=>(dispatch(getAllGoals(page)))}}
 footer={() =>{return (<>
 
  <Row>
-  <Col>Panchkula:</Col>
+  {/* <Col>Panchkula:</Col>
   <Col>{pklsum}</Col>
 
   <Col>Zirakpur</Col>
-  <Col>{zksum}</Col>
+  <Col>{zksum}</Col> */}
+
+  <Col>Total Sum</Col>
+  <Col>{Totalsum}</Col>
 
  </Row>
 </>)}}
@@ -226,23 +247,23 @@ footer={() =>{return (<>
 /> 
 
 </div> 
+
 </div> 
 
 
 </>:
 <><h3>Please add your Tasks First</h3></>}
 
-    {/* {allGoals.map((e)=>(
-      <ul>
-        <li>
-          {e.text} <button onClick={()=>{
-            dispatch(delGoal(e._id))
-           
-            console.log('id',e._id)
-          }}> Delete</button>   <button className='my-btn' >Edit</button>
-        </li>
-      </ul>
-    ))} */}
+<h3>Tottal Expense by city</h3>
+{totalExpense.map((e)=>(
+  <ul>
+    <li>{e.city} city Expense</li><span>{e.cityExpense}</span>
+  </ul>
+))}
+
+   
+
+    <div></div>
   </>
   )
 }
